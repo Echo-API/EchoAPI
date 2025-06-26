@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "EchoAPI",
+  "version": "1.0.0",
+  "description": "Test API endpoints instantly with no signup required. A developer-focused HTTP client.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "EchoAPI Tester",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline';"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

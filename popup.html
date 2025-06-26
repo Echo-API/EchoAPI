@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoAPI Tester</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <span class="logo-text">EchoAPI</span>
+            </div>
+            <div class="header-controls">
+                <button id="historyBtn" class="icon-btn" title="Request history">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8v4H8"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Dropdown - Back to native select -->
+        <div class="section">
+            <select id="settingsDropdown" class="settings-dropdown">
+                <option value="">Settings</option>
+                <option value="headers">Headers</option>
+                <option value="body">Body</option>
+                <option value="options">Options</option>
+                <option value="examples">Quick Examples</option>
+            </select>
+            
+            <!-- Settings Content (Hidden by default) -->
+            <div id="settingsContent" class="settings-content hidden">
+                <!-- Headers Section -->
+                <div id="headers-section" class="settings-section hidden">
+                    <div class="headers-container">
+                        <div class="header-row">
+                            <input type="text" placeholder="Header name" class="header-key">
+                            <input type="text" placeholder="Header value" class="header-value">
+                            <button class="remove-header">×</button>
+                        </div>
+                    </div>
+                    <button id="addHeader" class="add-btn">+ Add Header</button>
+                </div>
+
+                <!-- Body Section -->
+                <div id="body-section" class="settings-section hidden">
+                    <div class="body-type-selector">
+                        <select id="bodyType">
+                            <option value="none">No Body</option>
+                            <option value="json">JSON</option>
+                            <option value="form">Form Data</option>
+                            <option value="text">Raw Text</option>
+                            <option value="xml">XML</option>
+                        </select>
+                    </div>
+                    <textarea 
+                        id="requestBody" 
+                        class="body-textarea" 
+                        placeholder="Request body..."
+                        rows="6"
+                    ></textarea>
+                </div>
+
+                <!-- Options Section -->
+                <div id="options-section" class="settings-section hidden">
+                    <div class="setting-item">
+                        <label for="timeout">Timeout (seconds):</label>
+                        <input type="number" id="timeout" value="10" min="1" max="60">
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="followRedirects" checked>
+                            Follow redirects
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Quick Examples Section -->
+                <div id="examples-section" class="settings-section hidden">
+                    <div class="examples-list">
+                        <button class="example-btn" data-url="https://jsonplaceholder.typicode.com/users/1">JSONPlaceholder User</button>
+                        <button class="example-btn" data-url="https://httpbin.org/get">HTTPBin GET</button>
+                        <button class="example-btn" data-url="https://api.github.com/users/octocat">GitHub User</button>
+                        <button class="example-btn" data-url="https://reqres.in/api/users/2">ReqRes User</button>
+                        <button class="example-btn" data-url="https://httpbin.org/status/200">Status 200</button>
+                        <button class="example-btn" data-url="https://httpbin.org/delay/2">Delay Test</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Section -->
+        <div class="section">
+            <div class="method-url-container">
+                <select id="httpMethod" class="method-select">
+                    <option value="GET">Ping</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="HEAD">HEAD</option>
+                    <option value="OPTIONS">OPTIONS</option>
+                </select>
+                <input 
+                    type="text" 
+                    id="urlInput" 
+                    class="url-input" 
+                    placeholder="https://api.example.com/users/123"
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="send-btn">Send</button>
+            </div>
+            <div class="url-validation" id="urlValidation"></div>
+        </div>
+
+        <!-- Response Section - Moved up -->
+        <div class="section response-section">
+            <div class="response-header">
+                <h3>Response</h3>
+                <div class="response-controls">
+                    <button id="copyResponse" class="copy-btn" title="Copy response">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="m5 15-3 3 3 3"></path>
+                            <path d="m5 15-3 3 3 3"></path>
+                            <path d="M5 15H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                    <button id="exportResponse" class="export-btn" title="Export as JSON">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Response Status -->
+            <div id="responseStatus" class="response-status hidden">
+                <span class="status-code"></span>
+                <span class="status-text"></span>
+                <span class="response-time"></span>
+                <span class="response-size"></span>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <span>Sending request...</span>
+            </div>
+
+            <!-- Response Display -->
+            <div id="responseDisplay" class="response-display">
+                <div class="terminal-placeholder">
+                    <span class="terminal-cursor">_</span>
+                    <p>Ready to send requests...</p>
+                    <p class="terminal-hint">Enter a URL above and click Send</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div id="historyModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Request History</h3>
+                    <button id="closeHistory" class="close-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="historyList" class="history-list"></div>
+                    <button id="clearHistory" class="clear-btn">Clear History</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
