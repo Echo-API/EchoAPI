@@ -35,8 +35,7 @@ class EchoAPITester {
 
         // Close any open dropdowns when clicking elsewhere
         document.addEventListener('click', (e) => {
-            if (!e.target.matches('select')) {
-                // Force close any open native selects
+            if (!e.target.closest('.select-wrapper')) {
                 document.querySelectorAll('select').forEach(select => {
                     select.blur();
                 });
@@ -369,18 +368,47 @@ class EchoAPITester {
         display.innerHTML = '';
         display.appendChild(container);
         
-        // Add typing effect
-        this.animateTyping(pre, content);
+        // Add typing effect with smart scrolling
+        this.animateTypingWithSmartScroll(pre, content, display);
         
         this.currentRequest = response;
     }
     
-    animateTyping(element, fullContent) {
+    animateTypingWithSmartScroll(element, fullContent, scrollContainer) {
         element.innerHTML = '';
         element.style.borderRight = '2px solid #00ff88';
         
         let index = 0;
-        const speed = 20; // milliseconds per character
+        const speed = 15;
+        let autoScroll = true;
+        let userScrolling = false;
+        
+        // Function to check if user is at the bottom
+        const isAtBottom = () => {
+            const threshold = 5;
+            return scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - threshold;
+        };
+        
+        // Listen for user scroll events
+        const handleScroll = () => {
+            if (userScrolling) return;
+            
+            if (isAtBottom()) {
+                autoScroll = true;
+            } else {
+                autoScroll = false;
+            }
+        };
+        
+        // Listen for manual scroll wheel/touch events
+        const handleUserScroll = () => {
+            userScrolling = false;
+            handleScroll();
+        };
+        
+        scrollContainer.addEventListener('scroll', handleScroll);
+        scrollContainer.addEventListener('wheel', handleUserScroll);
+        scrollContainer.addEventListener('touchmove', handleUserScroll);
         
         const typeWriter = () => {
             if (index < fullContent.length) {
@@ -398,11 +426,29 @@ class EchoAPITester {
                     element.innerHTML += fullContent.charAt(index);
                     index++;
                 }
+                
+                // Auto-scroll only if enabled
+                if (autoScroll) {
+                    userScrolling = true;
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                    setTimeout(() => { userScrolling = false; }, 10);
+                }
+                
                 setTimeout(typeWriter, speed);
             } else {
                 // Typing complete
                 element.style.borderRight = 'none';
                 element.style.whiteSpace = 'pre-wrap';
+                
+                // Remove event listeners
+                scrollContainer.removeEventListener('scroll', handleScroll);
+                scrollContainer.removeEventListener('wheel', handleUserScroll);
+                scrollContainer.removeEventListener('touchmove', handleUserScroll);
+                
+                // Final scroll to bottom if auto-scroll is enabled
+                if (autoScroll) {
+                    scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                }
             }
         };
         
@@ -448,15 +494,31 @@ class EchoAPITester {
         // Response Headers
         content += 'Response Headers:\n';
         Object.entries(response.headers).forEach(([key, value]) => {
-            content += `${key}: ${value}\n`;
+            // Break long header values to prevent horizontal overflow
+            if (value.length > 50) {
+                const chunks = value.match(/.{1,50}/g) || [value];
+                content += `${key}: ${chunks.join('\n    ')}\n`;
+            } else {
+                content += `${key}: ${value}\n`;
+            }
         });
         
         content += '\nResponse Body:\n';
         
         if (typeof response.data === 'object') {
-            content += this.syntaxHighlightJSON(JSON.stringify(response.data, null, 2));
+            // Format JSON with proper indentation and line breaks
+            const jsonString = JSON.stringify(response.data, null, 2);
+            content += this.syntaxHighlightJSON(jsonString);
         } else {
-            content += this.escapeHtml(response.data);
+            // For text responses, ensure proper wrapping
+            const textData = response.data.toString();
+            if (textData.length > 80) {
+                // Break long lines
+                const wrappedText = textData.replace(/(.{80})/g, '$1\n');
+                content += this.escapeHtml(wrappedText);
+            } else {
+                content += this.escapeHtml(textData);
+            }
         }
         
         return content;
