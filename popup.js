@@ -316,10 +316,15 @@ class EchoAPITester {
     }
 
     showLoading() {
+        const responseSection = document.querySelector('.response-section');
+        
         document.getElementById('loadingIndicator').classList.remove('hidden');
         document.getElementById('responseStatus').classList.add('hidden');
         document.getElementById('responseDisplay').innerHTML = '';
         document.getElementById('sendBtn').disabled = true;
+        
+        // Remove status-visible class to make response bubble bigger
+        responseSection.classList.remove('status-visible');
     }
 
     hideLoading() {
@@ -328,8 +333,10 @@ class EchoAPITester {
     }
 
     displayResponseWithTyping(response) {
-        // Show status first
+        // Show status first and add class to shrink response section
         const statusEl = document.getElementById('responseStatus');
+        const responseSection = document.querySelector('.response-section');
+        
         const statusCode = statusEl.querySelector('.status-code');
         const statusText = statusEl.querySelector('.status-text');
         const responseTime = statusEl.querySelector('.response-time');
@@ -350,7 +357,9 @@ class EchoAPITester {
             statusCode.classList.add('error');
         }
         
+        // Show status and shrink response section
         statusEl.classList.remove('hidden');
+        responseSection.classList.add('status-visible');
         
         // Display response content with typing effect
         const display = document.getElementById('responseDisplay');
