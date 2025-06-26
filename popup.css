@@ -1,4 +1,4 @@
-/* Custom scrollbar styling */
+/* Custom scrollbar styling for response display */
 .response-display::-webkit-scrollbar {
     width: 6px !important;
 }
@@ -16,6 +16,27 @@
 }
 
 .response-display::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Custom scrollbar styling for entire popup */
+.container::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 3px !important;
+    margin: 4px !important;
+}
+
+.container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 3px !important;
+    transition: background 0.2s ease !important;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.5) !important;
 }
 
@@ -248,7 +269,7 @@ body {
     padding: 0;
 }
 
-/* Container with scroll capability */
+/* Container with full scroll and bottom gap - improved scroll behavior */
 .container {
     height: 100%;
     width: 100%;
@@ -258,9 +279,15 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     overflow-y: auto;
+    overflow-x: hidden;
     box-shadow: 
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         0 0 0 1px var(--glass-border);
+    /* Add bottom padding for gap */
+    padding-bottom: 24px;
+    /* Improve scroll performance */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Header with better padding */
@@ -276,6 +303,7 @@ body {
     -webkit-backdrop-filter: blur(10px);
     margin: 0;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .header::after {
@@ -335,6 +363,7 @@ body {
     animation: fadeIn 0.4s ease-out;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
+    flex-shrink: 0;
 }
 
 .section:last-child {
@@ -631,14 +660,13 @@ body {
     height: 16px;
 }
 
-/* Response Section - Now takes remaining space */
+/* Response Section - Now flexible with no max height */
 .response-section {
     padding: 20px 24px 24px 24px;
     border-bottom: none;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    flex-shrink: 0;
 }
 
 .response-header {
@@ -757,35 +785,38 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Response Display with glassy terminal effect */
+/* Response Display with fixed height and improved scroll behavior */
 .response-display {
-    flex: 1;
     background: var(--terminal-bg);
     border-radius: 16px;
     padding: 24px;
     font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
     font-size: 12px;
     line-height: 1.5;
-    overflow-y: auto;
     color: #00ff88;
     border: 1px solid var(--glass-border);
     box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.4);
-    min-height: 250px;
+    height: 200px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Improve scroll performance and prevent conflicts */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent scroll event conflicts */
+    overscroll-behavior: contain;
 }
 
 /* Response section with adjusted padding */
 .response-section {
     padding: 20px 24px 24px 24px;
     border-bottom: none;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .response-header {
@@ -1096,60 +1127,4 @@ body {
 
 .clear-btn:hover {
     background: #ff5252;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-    transition: background 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--border-light);
-}
-
-/* Additional animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Focus styles for accessibility */
-*:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
-}
-
-/* Remove bottom spacing adjustments for shorter popup */
-@media (max-height: 600px) {
-    .response-display {
-        min-height: 200px;
-    }
-    
-    .response-section {
-        padding: 16px 24px 20px 24px;
-    }
-}
+    transfor
