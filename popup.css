@@ -46,7 +46,9 @@
 .loading-indicator {
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
-}/* Fix all form elements styling */
+}
+
+/* Fix all form elements styling */
 .header-key,
 .header-value {
     flex: 1;
@@ -94,7 +96,10 @@
     transform: translateY(-1px);
 }
 
-.body-type-selector select {
+/* Enhanced dropdown styling */
+.body-type-selector select,
+.settings-dropdown,
+.method-select {
     padding: 10px 14px;
     background: var(--glass-bg);
     color: var(--text-primary);
@@ -116,28 +121,58 @@
     padding-right: 40px;
 }
 
-.body-type-selector select:focus {
+.body-type-selector select:focus,
+.settings-dropdown:focus,
+.method-select:focus {
     outline: none;
     border-color: var(--border-light);
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
 }
 
-.body-type-selector select option {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    padding: 10px;
-    border: none;
-}/* Settings content and examples */
+/* Critical fix for dropdown options */
+.body-type-selector select option,
+.settings-dropdown option,
+.method-select option {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    padding: 10px !important;
+    border: none !important;
+    font-size: 12px !important;
+}
+
+/* Additional option styling for better visibility */
+select option:checked {
+    background: var(--glass-border) !important;
+    color: var(--text-primary) !important;
+}
+
+select option:hover {
+    background: var(--glass-border) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Settings content and examples */
 .settings-content {
     margin-top: 18px;
 }
 
 .settings-section {
     margin-bottom: 22px;
+    display: none; /* Hidden by default */
 }
 
 .settings-section.active {
+    display: block !important; /* Force display when active */
+}
+
+/* Ensure settings content is visible when not hidden */
+.settings-content:not(.hidden) {
+    display: block;
+}
+
+/* Make sure sections are visible when they don't have hidden class */
+.settings-section:not(.hidden) {
     display: block;
 }
 
@@ -214,7 +249,9 @@
     -webkit-backdrop-filter: blur(10px);
     flex-shrink: 0;
     min-width: 70px;
-}/* Additional border radius enforcement */
+}
+
+/* Additional border radius enforcement */
 * {
     margin: 0;
     padding: 0;
