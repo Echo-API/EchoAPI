@@ -1,4 +1,44 @@
-/* Custom scrollbar styling for response display */
+/* Critical fix for dropdown options */
+.body-type-selector select option,
+.settings-dropdown option,
+.method-select option {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    padding: 10px !important;
+    border: none !important;
+    font-size: 12px !important;
+}
+
+/* Force consistent option styling in all states */
+.body-type-selector select option:checked,
+.settings-dropdown option:checked,
+.method-select option:checked,
+.body-type-selector select option:selected,
+.settings-dropdown option:selected,
+.method-select option:selected {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+.body-type-selector select option:hover,
+.settings-dropdown option:hover,
+.method-select option:hover {
+    background: var(--glass-border) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Additional fix for browser default styling */
+select option:checked {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+select option:hover {
+    background: var(--glass-border) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Override any browser default blue highlighting/* Custom scrollbar styling for response display */
 .response-display::-webkit-scrollbar {
     width: 6px !important;
 }
@@ -101,8 +141,8 @@
 .settings-dropdown,
 .method-select {
     padding: 10px 14px;
-    background: var(--glass-bg);
-    color: var(--text-primary);
+    background: var(--glass-bg) !important;
+    color: var(--text-primary) !important;
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -121,13 +161,27 @@
     padding-right: 40px;
 }
 
+/* Prevent background color changes on focus/hover */
 .body-type-selector select:focus,
 .settings-dropdown:focus,
-.method-select:focus {
-    outline: none;
+.method-select:focus,
+.body-type-selector select:hover,
+.settings-dropdown:hover,
+.method-select:hover {
+    outline: none !important;
+    background: var(--glass-bg) !important;
+    color: var(--text-primary) !important;
     border-color: var(--border-light);
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
+}
+
+/* Force consistent styling even when other dropdowns are active */
+.body-type-selector select:not(:focus):not(:hover),
+.settings-dropdown:not(:focus):not(:hover),
+.method-select:not(:focus):not(:hover) {
+    background: var(--glass-bg) !important;
+    color: var(--text-primary) !important;
 }
 
 /* Critical fix for dropdown options */
@@ -1105,141 +1159,4 @@ body {
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.close-btn:hover {
-    color: var(--text-primary);
-    background: var(--glass-border);
-    transform: scale(1.1);
-    box-shadow: var(--shadow-sm);
-}
-
-.modal-body {
-    padding: 24px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.history-item {
-    padding: 16px;
-    background: var(--bg-tertiary);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-}
-
-.history-item:hover {
-    background: var(--bg-quaternary);
-    border-color: var(--border-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.history-method {
-    font-weight: 700;
-    color: var(--text-primary);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-
-.history-url {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-    word-break: break-all;
-    font-family: 'SF Mono', Monaco, monospace;
-}
-
-.history-time {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
-
-.clear-btn {
-    width: 100%;
-    padding: 12px 20px;
-    background: var(--error-color);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.clear-btn:hover {
-    background: #ff5252;
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Scrollbar Styling for other elements */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-    transition: background 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--border-light);
-}
-
-/* Additional animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Focus styles for accessibility */
-*:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 2px;
-}
-
-/* Remove bottom spacing adjustments for shorter popup */
-@media (max-height: 600px) {
-    .response-display {
-        min-height: 200px;
-    }
-    
-    .response-section {
-        padding: 16px 24px 20px 24px;
-    }
-}
-    
+    -webkit-back
