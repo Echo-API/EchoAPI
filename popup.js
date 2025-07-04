@@ -21,26 +21,40 @@ class EchoAPITester {
             if (e.key === 'Enter') this.sendRequest();
         });
 
-        // Settings dropdown
+        // Settings dropdown - FIXED: Don't blur immediately and debug
         document.getElementById('settingsDropdown').addEventListener('change', (e) => {
+            console.log('Settings dropdown changed to:', e.target.value);
             this.showSettingsSection(e.target.value);
-            e.target.blur(); // Close dropdown after selection
         });
 
-        // Method dropdown  
+        // Method dropdown - FIXED: Don't blur immediately  
         document.getElementById('httpMethod').addEventListener('change', (e) => {
             this.updateBodyTabVisibility(e.target.value);
-            e.target.blur(); // Close dropdown after selection
         });
 
-        // Close any open dropdowns when clicking elsewhere
+        // Body type dropdown - FIXED: Don't blur immediately
+        document.getElementById('bodyType').addEventListener('change', (e) => {
+            this.updateBodyPlaceholder(e.target.value);
+        });
+
+        // FIXED: Only close dropdowns when clicking outside them
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.select-wrapper')) {
+            // Check if click is outside any dropdown
+            const isDropdownClick = e.target.closest('select') || 
+                                  e.target.closest('.settings-dropdown') || 
+                                  e.target.closest('.method-select') ||
+                                  e.target.closest('.body-type-selector');
+            
+            if (!isDropdownClick) {
+                // Only blur if clicking completely outside
                 document.querySelectorAll('select').forEach(select => {
                     select.blur();
                 });
             }
         });
+
+        // FIX: Prevent dropdown styling issues with forced styling
+        this.setupDropdownStylingFix();
 
         // Example buttons
         document.addEventListener('click', (e) => {
@@ -57,12 +71,6 @@ class EchoAPITester {
         // Headers
         document.getElementById('addHeader').addEventListener('click', () => this.addHeaderRow());
 
-        // Body type
-        document.getElementById('bodyType').addEventListener('change', (e) => {
-            this.updateBodyPlaceholder(e.target.value);
-            e.target.blur(); // Close dropdown after selection
-        });
-
         // Response controls
         document.getElementById('copyResponse').addEventListener('click', () => this.copyResponse());
         document.getElementById('exportResponse').addEventListener('click', () => this.exportResponse());
@@ -78,32 +86,112 @@ class EchoAPITester {
         });
     }
 
+    // NEW METHOD: Force dropdown styling consistency
+    setupDropdownStylingFix() {
+        const dropdowns = ['settingsDropdown', 'httpMethod', 'bodyType'];
+        
+        dropdowns.forEach(dropdownId => {
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+            
+            // Force styling on all events that might change appearance
+            const forceStyle = () => {
+                dropdown.style.background = 'rgba(255, 255, 255, 0.05)';
+                dropdown.style.color = '#ffffff';
+                dropdown.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            };
+            
+            // Apply forced styling on various events
+            dropdown.addEventListener('focus', forceStyle);
+            dropdown.addEventListener('blur', forceStyle);
+            dropdown.addEventListener('change', forceStyle);
+            dropdown.addEventListener('mouseenter', forceStyle);
+            dropdown.addEventListener('mouseleave', forceStyle);
+            
+            // Also force style other dropdowns when this one is interacted with
+            dropdown.addEventListener('focus', () => {
+                dropdowns.forEach(otherId => {
+                    if (otherId !== dropdownId) {
+                        const other = document.getElementById(otherId);
+                        if (other) {
+                            other.style.background = 'rgba(255, 255, 255, 0.05)';
+                            other.style.color = '#ffffff';
+                            other.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                        }
+                    }
+                });
+            });
+            
+            // Initial styling
+            forceStyle();
+        });
+        
+        // Also set up a periodic check to maintain styling
+        setInterval(() => {
+            dropdowns.forEach(dropdownId => {
+                const dropdown = document.getElementById(dropdownId);
+                if (dropdown && !dropdown.matches(':focus')) {
+                    dropdown.style.background = 'rgba(255, 255, 255, 0.05)';
+                    dropdown.style.color = '#ffffff';
+                    dropdown.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                }
+            });
+        }, 100);
+    }
+
     showSettingsSection(sectionName) {
+        console.log('showSettingsSection called with:', sectionName);
+        
+        // First hide all sections
         this.hideAllSettingsSections();
         
-        if (sectionName) {
-            document.getElementById('settingsContent').classList.remove('hidden');
+        if (sectionName && sectionName !== '') {
+            // Show the settings content container
+            const settingsContent = document.getElementById('settingsContent');
+            console.log('settingsContent element:', settingsContent);
+            
+            if (settingsContent) {
+                settingsContent.classList.remove('hidden');
+                settingsContent.style.display = 'block'; // Force display
+                console.log('Settings content shown');
+            }
+            
+            // Show the specific section
             const section = document.getElementById(`${sectionName}-section`);
+            console.log(`Looking for section: ${sectionName}-section`, section);
+            
             if (section) {
                 section.classList.remove('hidden');
+                section.style.display = 'block'; // Force display
+                console.log(`Section ${sectionName} shown`);
+            } else {
+                console.error(`Section ${sectionName}-section not found!`);
             }
-        } else {
-            document.getElementById('settingsContent').classList.add('hidden');
         }
     }
 
     hideAllSettingsSections() {
+        // Hide the main settings content
+        const settingsContent = document.getElementById('settingsContent');
+        if (settingsContent) {
+            settingsContent.classList.add('hidden');
+            settingsContent.style.display = 'none';
+        }
+        
+        // Hide all individual sections
         const sections = ['headers-section', 'body-section', 'options-section', 'examples-section'];
         sections.forEach(sectionId => {
             const section = document.getElementById(sectionId);
             if (section) {
                 section.classList.add('hidden');
+                section.style.display = 'none';
             }
         });
     }
 
     addInitialHeader() {
-        this.addHeaderRow('Content-Type', 'application/json');
+        // Start with minimal headers
+        this.addHeaderRow('Accept', 'application/json, text/plain, */*');
     }
 
     addHeaderRow(key = '', value = '') {
@@ -133,13 +221,7 @@ class EchoAPITester {
             // If body section is currently visible and method doesn't support body, hide it
             this.hideAllSettingsSections();
             document.getElementById('settingsDropdown').value = '';
-            document.getElementById('settingsContent').classList.add('hidden');
         }
-    }
-
-    addInitialHeader() {
-        // Start with minimal headers - only add Content-Type for POST requests
-        this.addHeaderRow('Accept', 'application/json, text/plain, */*');
     }
 
     updateBodyPlaceholder(bodyType) {
@@ -608,114 +690,4 @@ class EchoAPITester {
         
         document.body.appendChild(toast);
         setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
-
-    async saveToHistory(request) {
-        try {
-            const result = await chrome.storage.local.get(['requestHistory']);
-            let history = result.requestHistory || [];
-            
-            // Add new request to beginning
-            history.unshift(request);
-            
-            // Keep only last 10 requests
-            history = history.slice(0, 10);
-            
-            await chrome.storage.local.set({ requestHistory: history });
-            this.requestHistory = history;
-        } catch (error) {
-            console.error('Failed to save history:', error);
-        }
-    }
-
-    async loadHistory() {
-        try {
-            const result = await chrome.storage.local.get(['requestHistory']);
-            this.requestHistory = result.requestHistory || [];
-        } catch (error) {
-            console.error('Failed to load history:', error);
-            this.requestHistory = [];
-        }
-    }
-
-    showHistory() {
-        const modal = document.getElementById('historyModal');
-        const historyList = document.getElementById('historyList');
-        
-        if (this.requestHistory.length === 0) {
-            historyList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No requests in history</p>';
-        } else {
-            historyList.innerHTML = this.requestHistory.map((request, index) => `
-                <div class="history-item" data-index="${index}">
-                    <div class="history-method">${request.method}</div>
-                    <div class="history-url">${request.url}</div>
-                    <div class="history-time">${new Date(request.timestamp).toLocaleString()}</div>
-                </div>
-            `).join('');
-            
-            // Add click handlers
-            historyList.querySelectorAll('.history-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const index = parseInt(item.dataset.index);
-                    this.loadFromHistory(index);
-                    this.hideHistory();
-                });
-            });
-        }
-        
-        modal.classList.remove('hidden');
-    }
-
-    hideHistory() {
-        document.getElementById('historyModal').classList.add('hidden');
-    }
-
-    loadFromHistory(index) {
-        const request = this.requestHistory[index];
-        if (!request) return;
-        
-        // Load basic request data
-        document.getElementById('urlInput').value = request.url;
-        document.getElementById('httpMethod').value = request.method;
-        
-        // Clear existing headers
-        document.querySelectorAll('.header-row').forEach(row => row.remove());
-        
-        // Load headers
-        Object.entries(request.headers).forEach(([key, value]) => {
-            this.addHeaderRow(key, value);
-        });
-        
-        // Load body
-        if (request.body) {
-            document.getElementById('requestBody').value = request.body;
-            // Try to detect body type
-            try {
-                JSON.parse(request.body);
-                document.getElementById('bodyType').value = 'json';
-            } catch {
-                document.getElementById('bodyType').value = 'text';
-            }
-        }
-        
-        this.validateUrl();
-    }
-
-    async clearHistory() {
-        try {
-            await chrome.storage.local.remove(['requestHistory']);
-            this.requestHistory = [];
-            this.hideHistory();
-            this.showToast('History cleared');
-        } catch (error) {
-            console.error('Failed to clear history:', error);
-        }
-    }
-}
-
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new EchoAPITester();
-});
+            toast.re
