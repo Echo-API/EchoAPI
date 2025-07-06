@@ -90,15 +90,25 @@ class EchoAPITester {
     setupDropdownStylingFix() {
         const dropdowns = ['settingsDropdown', 'httpMethod', 'bodyType'];
         
+        const arrowSvg = "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e\")";
+        
         dropdowns.forEach(dropdownId => {
             const dropdown = document.getElementById(dropdownId);
             if (!dropdown) return;
             
             // Force styling on all events that might change appearance
             const forceStyle = () => {
-                dropdown.style.background = 'rgba(255, 255, 255, 0.05)';
-                dropdown.style.color = '#ffffff';
-                dropdown.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                dropdown.style.setProperty('background', 'rgba(255, 255, 255, 0.05)', 'important');
+                dropdown.style.setProperty('color', '#ffffff', 'important');
+                dropdown.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.1)', 'important');
+                dropdown.style.setProperty('background-image', arrowSvg, 'important');
+                dropdown.style.setProperty('background-repeat', 'no-repeat', 'important');
+                dropdown.style.setProperty('background-position', 'right 12px center', 'important');
+                dropdown.style.setProperty('background-size', '16px', 'important');
+                dropdown.style.setProperty('-webkit-appearance', 'none', 'important');
+                dropdown.style.setProperty('-moz-appearance', 'none', 'important');
+                dropdown.style.setProperty('appearance', 'none', 'important');
+                dropdown.style.setProperty('padding-right', '40px', 'important');
             };
             
             // Apply forced styling on various events
@@ -107,6 +117,7 @@ class EchoAPITester {
             dropdown.addEventListener('change', forceStyle);
             dropdown.addEventListener('mouseenter', forceStyle);
             dropdown.addEventListener('mouseleave', forceStyle);
+            dropdown.addEventListener('click', forceStyle);
             
             // Also force style other dropdowns when this one is interacted with
             dropdown.addEventListener('focus', () => {
@@ -114,9 +125,13 @@ class EchoAPITester {
                     if (otherId !== dropdownId) {
                         const other = document.getElementById(otherId);
                         if (other) {
-                            other.style.background = 'rgba(255, 255, 255, 0.05)';
-                            other.style.color = '#ffffff';
-                            other.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                            other.style.setProperty('background', 'rgba(255, 255, 255, 0.05)', 'important');
+                            other.style.setProperty('color', '#ffffff', 'important');
+                            other.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.1)', 'important');
+                            other.style.setProperty('background-image', arrowSvg, 'important');
+                            other.style.setProperty('background-repeat', 'no-repeat', 'important');
+                            other.style.setProperty('background-position', 'right 12px center', 'important');
+                            other.style.setProperty('background-size', '16px', 'important');
                         }
                     }
                 });
@@ -126,17 +141,25 @@ class EchoAPITester {
             forceStyle();
         });
         
-        // Also set up a periodic check to maintain styling
+        // Also set up a more frequent check to maintain styling
         setInterval(() => {
             dropdowns.forEach(dropdownId => {
                 const dropdown = document.getElementById(dropdownId);
-                if (dropdown && !dropdown.matches(':focus')) {
-                    dropdown.style.background = 'rgba(255, 255, 255, 0.05)';
-                    dropdown.style.color = '#ffffff';
-                    dropdown.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                if (dropdown) {
+                    dropdown.style.setProperty('background', 'rgba(255, 255, 255, 0.05)', 'important');
+                    dropdown.style.setProperty('color', '#ffffff', 'important');
+                    dropdown.style.setProperty('border', '1px solid rgba(255, 255, 255, 0.1)', 'important');
+                    dropdown.style.setProperty('background-image', arrowSvg, 'important');
+                    dropdown.style.setProperty('background-repeat', 'no-repeat', 'important');
+                    dropdown.style.setProperty('background-position', 'right 12px center', 'important');
+                    dropdown.style.setProperty('background-size', '16px', 'important');
+                    dropdown.style.setProperty('-webkit-appearance', 'none', 'important');
+                    dropdown.style.setProperty('-moz-appearance', 'none', 'important');
+                    dropdown.style.setProperty('appearance', 'none', 'important');
+                    dropdown.style.setProperty('padding-right', '40px', 'important');
                 }
             });
-        }, 100);
+        }, 50); // More frequent checks
     }
 
     showSettingsSection(sectionName) {
@@ -690,4 +713,114 @@ class EchoAPITester {
         
         document.body.appendChild(toast);
         setTimeout(() => {
-            toast.re
+            toast.remove();
+        }, 3000);
+    }
+
+    async saveToHistory(request) {
+        try {
+            const result = await chrome.storage.local.get(['requestHistory']);
+            let history = result.requestHistory || [];
+            
+            // Add new request to beginning
+            history.unshift(request);
+            
+            // Keep only last 10 requests
+            history = history.slice(0, 10);
+            
+            await chrome.storage.local.set({ requestHistory: history });
+            this.requestHistory = history;
+        } catch (error) {
+            console.error('Failed to save history:', error);
+        }
+    }
+
+    async loadHistory() {
+        try {
+            const result = await chrome.storage.local.get(['requestHistory']);
+            this.requestHistory = result.requestHistory || [];
+        } catch (error) {
+            console.error('Failed to load history:', error);
+            this.requestHistory = [];
+        }
+    }
+
+    showHistory() {
+        const modal = document.getElementById('historyModal');
+        const historyList = document.getElementById('historyList');
+        
+        if (this.requestHistory.length === 0) {
+            historyList.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No requests in history</p>';
+        } else {
+            historyList.innerHTML = this.requestHistory.map((request, index) => `
+                <div class="history-item" data-index="${index}">
+                    <div class="history-method">${request.method}</div>
+                    <div class="history-url">${request.url}</div>
+                    <div class="history-time">${new Date(request.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+            
+            // Add click handlers
+            historyList.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const index = parseInt(item.dataset.index);
+                    this.loadFromHistory(index);
+                    this.hideHistory();
+                });
+            });
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    hideHistory() {
+        document.getElementById('historyModal').classList.add('hidden');
+    }
+
+    loadFromHistory(index) {
+        const request = this.requestHistory[index];
+        if (!request) return;
+        
+        // Load basic request data
+        document.getElementById('urlInput').value = request.url;
+        document.getElementById('httpMethod').value = request.method;
+        
+        // Clear existing headers
+        document.querySelectorAll('.header-row').forEach(row => row.remove());
+        
+        // Load headers
+        Object.entries(request.headers).forEach(([key, value]) => {
+            this.addHeaderRow(key, value);
+        });
+        
+        // Load body
+        if (request.body) {
+            document.getElementById('requestBody').value = request.body;
+            // Try to detect body type
+            try {
+                JSON.parse(request.body);
+                document.getElementById('bodyType').value = 'json';
+            } catch {
+                document.getElementById('bodyType').value = 'text';
+            }
+        }
+        
+        this.validateUrl();
+    }
+
+    async clearHistory() {
+        try {
+            await chrome.storage.local.remove(['requestHistory']);
+            this.requestHistory = [];
+            this.hideHistory();
+            this.showToast('History cleared');
+        } catch (error) {
+            console.error('Failed to clear history:', error);
+        }
+    }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new EchoAPITester();
+});
