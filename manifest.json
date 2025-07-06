@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "EchoAPI",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Test API endpoints instantly with no signup required. A developer-focused HTTP client.",
   "permissions": [
     "storage",
